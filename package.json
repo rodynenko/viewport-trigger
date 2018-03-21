@@ -3,5 +3,9 @@
   "version": "1.0.0",
   "description": "Perfomant, light library in pure JS to trigger callback when elements exit or leave viewport, using IntersectionObserver API",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^4.19.0",
+    "eslint-config-airbnb": "^16.1.0"
+  }
 }
