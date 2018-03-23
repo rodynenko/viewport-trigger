@@ -47,3 +47,5 @@ function generateBundle() {
 }
 
 generateBundle();
+
+module.exports = generateBundle;

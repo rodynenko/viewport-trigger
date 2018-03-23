@@ -3,8 +3,14 @@
   "version": "1.0.0",
   "description": "Perfomant, light library in pure JS to trigger callback when elements exit or leave viewport, using IntersectionObserver API",
   "homepage": "https://github.com/rodynenko/viewport-trigger",
+  "engines": {
+    "node": ">=6.9"
+  },
   "scripts": {
-    "build": "cross-env NODE_ENV=production node build.js"
+    "build": "cross-env NODE_ENV=production node build.js",
+    "build:dev": "cross-env NODE_ENV=development node watch.js",
+    "dev": "npm-run-all --parallel serve build:dev",
+    "serve": "browser-sync start --server \".\" --index \"demo/index.html\" --files \"demo\" --files \"dist\" --port 3000"
   },
   "author": {
     "name": "Taras Rodynenko"
@@ -31,10 +37,13 @@
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-0": "^6.24.1",
+    "browser-sync": "^2.23.6",
+    "chokidar": "^2.0.2",
     "cross-env": "^5.1.4",
     "eslint": "^4.19.0",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-plugin-import": "^2.9.0",
+    "npm-run-all": "^4.1.2",
     "rollup": "^0.57.1",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-filesize": "^1.5.0",
