@@ -4,8 +4,8 @@ const babel = require('rollup-plugin-babel');
 const uglify = require('rollup-plugin-uglify');
 
 const targets = {
-	min: 'dist/viewport-target.min.js',
-	umd: 'dist/viewport-target.js'
+	min: 'dist/viewport-trigger.min.js',
+	umd: 'dist/viewport-trigger.js'
 };
 
 const defaultPlugins = [
