@@ -8,9 +8,13 @@
 	</head>
 	<body>
 		<div class="main">
-			<header></header>
-			<div class="container">Hello world</div>
-			<footer></footer>
+			<header>
+				<h3 class="title">This is a simple demo page for viewport-trigger. Just scroll to see container's background-color change when target is in/out the viewport</h3>
+				<div id='title-status'>Target is <b id='message'>OUT</b></div>
+			</header>
+			<div class="container">
+				<div id='target'></div>
+			</div>
 		</div>
 		<script defer src="https://rawgit.com/w3c/IntersectionObserver/master/polyfill/intersection-observer.js"></script>
 		<script defer src="dist/viewport-trigger.min.js"></script>

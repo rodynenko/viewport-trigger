@@ -1,0 +1,32 @@
+.container {
+	position: relative;
+	height: 300vh;
+}
+
+.background-red {
+	background-color: #FFDAB9;
+}
+
+.background-green {
+	background-color: #90EE90;
+}
+
+header {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	z-index: 2;
+}
+
+#target {
+	position: absolute;
+	margin-left: -100px;
+	margin-top: -100px;
+	top: 50%;
+	left: 50%;
+	width: 200px;
+	height: 200px;
+	background-color: #4682B4;
+}
