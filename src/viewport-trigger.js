@@ -1,5 +1,5 @@
-const defaultObserverConfig = {
-	root: '0px',
+const defaultObserverOptions = {
+	rootMargin: '0px',
 	threshold: 0,
 };
 
@@ -30,22 +30,24 @@ function forOwn(obj, callback) {
 	}
 }
 
-class ViewportTrigger {
-	constuctor(options) {
-
-		if (!window.IntersectionObserver) {
-			throw new Error('There is native support for IntersectionObserver API. Please, use polyfill');
-		}
-
-		this._observer = new IntersectionObserver(this.handleIntersectionCall, options);
-
-		this._eventHandlers = {
-			enter: [],
-			leave: [],
-		};
+function ViewportTrigger(options = {}) {
+	if (!window.IntersectionObserver) {
+		throw new Error('There is no native support for IntersectionObserver API in your browser. Please, use polyfill');
 	}
 
-	handleIntersectionCall(entries) {
+	const observerOptions = {
+		rootMargin: options.rootMargin || defaultObserverOptions.rootMargin,
+		threshold: options.threshold || defaultObserverOptions.threshold,
+	};
+
+	const _observer = new IntersectionObserver(handleIntersectionCall, observerOptions);
+
+	const _eventHandlers = {
+		enter: [],
+		leave: [],
+	};
+
+	function handleIntersectionCall(entries) {
 		for (let i = 0, len = entries.length; i < len; i += 1) {
 			const entry = entries[i];
 			const { intersectionRatio, target } = entry;
@@ -54,20 +56,20 @@ class ViewportTrigger {
 			if (intersectionRatio > 0) {
 				if (cl.contains('in-viewport')) {
 					cl.remove('in-viewport');
-					this.handleEvent('leave', target);
+					handleEvent('leave', target);
 				} else {
 					cl.add('in-viewport');
-					this.handleEvent('enter', target);
+					handleEvent('enter', target);
 				}
 			} else if (cl.contains('in-viewport')) {
 				cl.remove('in-viewport');
-				this.handleEvent('leave', target);
+				handleEvent('leave', target);
 			}
 		}
 	}
 
-	handleEvent(eventType, target) {
-		const targets = this._eventHandlers[type];
+	function handleEvent(eventType, target) {
+		const targets = _eventHandlers[eventType];
 		const index = findIndex(targets, el => el.target === target);
 
 		if (index > -1) {
@@ -75,58 +77,62 @@ class ViewportTrigger {
 		}
 	}
 
-	observe = (target) => {
-		if (!target) throw new Error('Target element is not set for observe function');
-		this._observer.observe(target);
-		return this;
-	};
 
-	unobserve = (target) => {
-		if (!target) throw new Error('Target element is not set for unobserve function');
-		this._observer.unobserve(target);
-		forOwn(this._eventHandlers, (value, key) => {
-			const targetIndex = findIndex(this._eventHandlers[key], target);
+	return {
+		getObserver: () => _observer,
 
-			if (targetIndex > -1) {
-				this._eventHandlers[key].splice(targetIndex, 1);
+		observe: function (target){
+			if (!target) throw new Error('Target element is not set for observe function');
+			_observer.observe(target);
+			return this;
+		},
+
+		on: function (eventType, target, trigger){
+			if (!Array.isArray(_eventHandlers[eventType])) {
+				throw new Error('viewportObserver: method `on` get not correct event type');
 			}
-		})
 
-		return this;
-	};
+			_eventHandlers[eventType].push({
+				target,
+				trigger,
+			});
 
-	unobserveAll = () => {
-		this._observer.disconnect();
-		forOwn(this._eventHandlers, (value, key) => {
-			this._eventHandlers[key].length = 0;
-		});
-	}
+			return this;
+		},
 
-	on = (eventType, target, trigger) => {
-		if (!Array.isArray(this._eventHandlers[eventType])) {
-			throw new Error('viewportObserver: method `on` get not correct event type');
+		off: function (eventType, target){
+			if (!Array.isArray(_eventHandlers[eventType])) {
+				throw new Error('viewportObserver: method `off` get not correct event type');
+			}
+
+			const offEventIndex = findIndex(_eventHandlers[eventType], t => t.target === target);
+
+			if (offEventIndex > -1) {
+				_eventHandlers[eventType].splice(offEventIndex, 1);
+			}
+
+			return this;
+		},
+
+		unobserve: (target) => {
+			if (!target) throw new Error('Target element is not set for unobserve function');
+			_observer.unobserve(target);
+			forOwn(_eventHandlers, (value, key) => {
+				const targetIndex = findIndex(_eventHandlers[key], target);
+
+				if (targetIndex > -1) {
+					_eventHandlers[key].splice(targetIndex, 1);
+				}
+			})
+		},
+
+		unobserveAll: () => {
+			_observer.disconnect();
+			forOwn(_eventHandlers, (value, key) => {
+				_eventHandlers[key].length = 0;
+			});
 		}
 
-		this._eventHandlers[type].push({
-			target,
-			trigger,
-		});
-
-		return this;
-	};
-
-	off = (eventType, target) => {
-		if (!Array.isArray(this._eventHandlers[eventType])) {
-			throw new Error('viewportObserver: method `off` get not correct event type');
-		}
-
-		const offEventIndex = findIndex(this._eventHandlers[eventType], t => t.target === target);
-
-		if (offEventIndex > -1) {
-			this._eventHandlers[eventType].splice(offEventIndex, 1);
-		}
-
-		return this;
 	};
 
 }

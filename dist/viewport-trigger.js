@@ -1,178 +1,156 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
-  typeof define === 'function' && define.amd ? define(factory) :
-  (global.ViewportTrigger = factory());
+	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
+	typeof define === 'function' && define.amd ? define(factory) :
+	(global.ViewportTrigger = factory());
 }(this, (function () { 'use strict';
 
-  var classCallCheck = function (instance, Constructor) {
-    if (!(instance instanceof Constructor)) {
-      throw new TypeError("Cannot call a class as a function");
-    }
-  };
+	var defaultObserverOptions = {
+		rootMargin: '0px',
+		threshold: 0
+	};
 
-  var createClass = function () {
-    function defineProperties(target, props) {
-      for (var i = 0; i < props.length; i++) {
-        var descriptor = props[i];
-        descriptor.enumerable = descriptor.enumerable || false;
-        descriptor.configurable = true;
-        if ("value" in descriptor) descriptor.writable = true;
-        Object.defineProperty(target, descriptor.key, descriptor);
-      }
-    }
+	function findIndex(arr, predicate) {
+		var k = 0;
+		var len = arr.length;
 
-    return function (Constructor, protoProps, staticProps) {
-      if (protoProps) defineProperties(Constructor.prototype, protoProps);
-      if (staticProps) defineProperties(Constructor, staticProps);
-      return Constructor;
-    };
-  }();
+		while (k < len) {
+			var item = arr[0];
 
-  function findIndex(arr, predicate) {
-  	var k = 0;
-  	var len = arr.length;
+			if (predicate(item, k, arr)) {
+				return k;
+			}
+			k++;
+		}
 
-  	while (k < len) {
-  		var item = arr[0];
+		return -1;
+	}
 
-  		if (predicate(item, k, arr)) {
-  			return k;
-  		}
-  		k++;
-  	}
+	function forOwn(obj, callback) {
+		var props = Object.getOwnPropertyNames(obj);
 
-  	return -1;
-  }
+		for (var i = 0, len = props.length; i < len; i += 1) {
+			var key = props[i];
+			var value = obj[prop];
 
-  function forOwn(obj, callback) {
-  	var props = Object.getOwnPropertyNames(obj);
+			callback(value, key);
+		}
+	}
 
-  	for (var i = 0, len = props.length; i < len; i += 1) {
-  		var key = props[i];
-  		var value = obj[prop];
+	function ViewportTrigger() {
+		var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-  		callback(value, key);
-  	}
-  }
+		if (!window.IntersectionObserver) {
+			throw new Error('There is no native support for IntersectionObserver API in your browser. Please, use polyfill');
+		}
 
-  var ViewportTrigger = function () {
-  	function ViewportTrigger() {
-  		var _this = this;
+		var observerOptions = {
+			rootMargin: options.rootMargin || defaultObserverOptions.rootMargin,
+			threshold: options.threshold || defaultObserverOptions.threshold
+		};
 
-  		classCallCheck(this, ViewportTrigger);
+		var _observer = new IntersectionObserver(handleIntersectionCall, observerOptions);
 
-  		this.observe = function (target) {
-  			if (!target) throw new Error('Target element is not set for observe function');
-  			_this._observer.observe(target);
-  			return _this;
-  		};
+		var _eventHandlers = {
+			enter: [],
+			leave: []
+		};
 
-  		this.unobserve = function (target) {
-  			if (!target) throw new Error('Target element is not set for unobserve function');
-  			_this._observer.unobserve(target);
-  			forOwn(_this._eventHandlers, function (value, key) {
-  				var targetIndex = findIndex(_this._eventHandlers[key], target);
+		function handleIntersectionCall(entries) {
+			for (var i = 0, len = entries.length; i < len; i += 1) {
+				var entry = entries[i];
+				var intersectionRatio = entry.intersectionRatio,
+				    target = entry.target;
 
-  				if (targetIndex > -1) {
-  					_this._eventHandlers[key].splice(targetIndex, 1);
-  				}
-  			});
+				var cl = target.classList;
 
-  			return _this;
-  		};
+				if (intersectionRatio > 0) {
+					if (cl.contains('in-viewport')) {
+						cl.remove('in-viewport');
+						handleEvent('leave', target);
+					} else {
+						cl.add('in-viewport');
+						handleEvent('enter', target);
+					}
+				} else if (cl.contains('in-viewport')) {
+					cl.remove('in-viewport');
+					handleEvent('leave', target);
+				}
+			}
+		}
 
-  		this.unobserveAll = function () {
-  			_this._observer.disconnect();
-  			forOwn(_this._eventHandlers, function (value, key) {
-  				_this._eventHandlers[key].length = 0;
-  			});
-  		};
+		function handleEvent(eventType, target) {
+			var targets = _eventHandlers[eventType];
+			var index = findIndex(targets, function (el) {
+				return el.target === target;
+			});
 
-  		this.on = function (eventType, target, trigger) {
-  			if (!Array.isArray(_this._eventHandlers[eventType])) {
-  				throw new Error('viewportObserver: method `on` get not correct event type');
-  			}
+			if (index > -1) {
+				targets[index].trigger();
+			}
+		}
 
-  			_this._eventHandlers[type].push({
-  				target: target,
-  				trigger: trigger
-  			});
+		return {
+			getObserver: function getObserver() {
+				return _observer;
+			},
 
-  			return _this;
-  		};
+			observe: function observe(target) {
+				if (!target) throw new Error('Target element is not set for observe function');
+				_observer.observe(target);
+				return this;
+			},
 
-  		this.off = function (eventType, target) {
-  			if (!Array.isArray(_this._eventHandlers[eventType])) {
-  				throw new Error('viewportObserver: method `off` get not correct event type');
-  			}
+			on: function on(eventType, target, trigger) {
+				if (!Array.isArray(_eventHandlers[eventType])) {
+					throw new Error('viewportObserver: method `on` get not correct event type');
+				}
 
-  			var offEventIndex = findIndex(_this._eventHandlers[eventType], function (t) {
-  				return t.target === target;
-  			});
+				_eventHandlers[eventType].push({
+					target: target,
+					trigger: trigger
+				});
 
-  			if (offEventIndex > -1) {
-  				_this._eventHandlers[eventType].splice(offEventIndex, 1);
-  			}
+				return this;
+			},
 
-  			return _this;
-  		};
-  	}
+			off: function off(eventType, target) {
+				if (!Array.isArray(_eventHandlers[eventType])) {
+					throw new Error('viewportObserver: method `off` get not correct event type');
+				}
 
-  	createClass(ViewportTrigger, [{
-  		key: 'constuctor',
-  		value: function constuctor(options) {
+				var offEventIndex = findIndex(_eventHandlers[eventType], function (t) {
+					return t.target === target;
+				});
 
-  			if (!window.IntersectionObserver) {
-  				throw new Error('There is native support for IntersectionObserver API. Please, use polyfill');
-  			}
+				if (offEventIndex > -1) {
+					_eventHandlers[eventType].splice(offEventIndex, 1);
+				}
 
-  			this._observer = new IntersectionObserver(this.handleIntersectionCall, options);
+				return this;
+			},
 
-  			this._eventHandlers = {
-  				enter: [],
-  				leave: []
-  			};
-  		}
-  	}, {
-  		key: 'handleIntersectionCall',
-  		value: function handleIntersectionCall(entries) {
-  			for (var i = 0, len = entries.length; i < len; i += 1) {
-  				var entry = entries[i];
-  				var intersectionRatio = entry.intersectionRatio,
-  				    target = entry.target;
+			unobserve: function unobserve(target) {
+				if (!target) throw new Error('Target element is not set for unobserve function');
+				_observer.unobserve(target);
+				forOwn(_eventHandlers, function (value, key) {
+					var targetIndex = findIndex(_eventHandlers[key], target);
 
-  				var cl = target.classList;
+					if (targetIndex > -1) {
+						_eventHandlers[key].splice(targetIndex, 1);
+					}
+				});
+			},
 
-  				if (intersectionRatio > 0) {
-  					if (cl.contains('in-viewport')) {
-  						cl.remove('in-viewport');
-  						this.handleEvent('leave', target);
-  					} else {
-  						cl.add('in-viewport');
-  						this.handleEvent('enter', target);
-  					}
-  				} else if (cl.contains('in-viewport')) {
-  					cl.remove('in-viewport');
-  					this.handleEvent('leave', target);
-  				}
-  			}
-  		}
-  	}, {
-  		key: 'handleEvent',
-  		value: function handleEvent(eventType, target) {
-  			var targets = this._eventHandlers[type];
-  			var index = findIndex(targets, function (el) {
-  				return el.target === target;
-  			});
+			unobserveAll: function unobserveAll() {
+				_observer.disconnect();
+				forOwn(_eventHandlers, function (value, key) {
+					_eventHandlers[key].length = 0;
+				});
+			}
 
-  			if (index > -1) {
-  				targets[index].trigger();
-  			}
-  		}
-  	}]);
-  	return ViewportTrigger;
-  }();
+		};
+	}
 
-  return ViewportTrigger;
+	return ViewportTrigger;
 
 })));
