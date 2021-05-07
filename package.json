@@ -1,6 +1,6 @@
 {
   "name": "viewport-trigger",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Perfomant, light library in pure JS to trigger callback when elements exit or leave viewport, using IntersectionObserver API",
   "homepage": "https://github.com/rodynenko/viewport-trigger",
   "engines": {

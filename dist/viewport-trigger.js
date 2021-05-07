@@ -21,7 +21,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
         return k;
       }
 
-      k++;
+      k += 1;
     }
 
     return -1;
@@ -32,12 +32,14 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
     for (var i = 0, len = props.length; i < len; i += 1) {
       var key = props[i];
-      var value = obj[prop];
+      var value = obj[key];
       callback(value, key);
     }
   }
 
   function ViewportTrigger() {
+    var _this = this;
+
     var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
     if (!window.IntersectionObserver) {
@@ -98,7 +100,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
 
         _observer.observe(target);
 
-        return this;
+        return _this;
       },
       on: function on(eventType, target, trigger) {
         if (!Array.isArray(_eventHandlers[eventType])) {
@@ -110,7 +112,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           trigger: trigger
         });
 
-        return this;
+        return _this;
       },
       off: function off(eventType, target) {
         if (!Array.isArray(_eventHandlers[eventType])) {
@@ -125,7 +127,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "functi
           _eventHandlers[eventType].splice(offEventIndex, 1);
         }
 
-        return this;
+        return _this;
       },
       unobserve: function unobserve(target) {
         if (!target) throw new Error('Target element is not set for unobserve function');
