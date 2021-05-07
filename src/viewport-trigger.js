@@ -13,7 +13,7 @@ function findIndex(arr, predicate) {
 		if (predicate(item, k, arr)) {
 			return k;
 		}
-		k++;
+		k += 1;
 	}
 
 	return -1;
@@ -24,7 +24,7 @@ function forOwn(obj, callback) {
 
 	for (let i = 0, len = props.length; i < len; i += 1) {
 		const key = props[i];
-		const value = obj[prop];
+		const value = obj[key];
 
 		callback(value, key);
 	}
@@ -44,7 +44,7 @@ function ViewportTrigger(options = {}) {
 
 	const _eventHandlers = {
 		enter: [],
-		leave: [],
+		leave: []
 	};
 
 	function handleIntersectionCall(entries) {
@@ -70,42 +70,41 @@ function ViewportTrigger(options = {}) {
 
 	function handleEvent(eventType, target) {
 		const targets = _eventHandlers[eventType];
-		const index = findIndex(targets, el => el.target === target);
+		const index = findIndex(targets, (el) => el.target === target);
 
 		if (index > -1) {
 			targets[index].trigger();
 		}
 	}
 
-
 	return {
 		getObserver: () => _observer,
 
-		observe: function (target){
+		observe: (target) => {
 			if (!target) throw new Error('Target element is not set for observe function');
 			_observer.observe(target);
 			return this;
 		},
 
-		on: function (eventType, target, trigger){
+		on: (eventType, target, trigger) => {
 			if (!Array.isArray(_eventHandlers[eventType])) {
 				throw new Error('viewportObserver: method `on` get not correct event type');
 			}
 
 			_eventHandlers[eventType].push({
 				target,
-				trigger,
+				trigger
 			});
 
 			return this;
 		},
 
-		off: function (eventType, target){
+		off: (eventType, target) => {
 			if (!Array.isArray(_eventHandlers[eventType])) {
 				throw new Error('viewportObserver: method `off` get not correct event type');
 			}
 
-			const offEventIndex = findIndex(_eventHandlers[eventType], t => t.target === target);
+			const offEventIndex = findIndex(_eventHandlers[eventType], (t) => t.target === target);
 
 			if (offEventIndex > -1) {
 				_eventHandlers[eventType].splice(offEventIndex, 1);
@@ -123,7 +122,7 @@ function ViewportTrigger(options = {}) {
 				if (targetIndex > -1) {
 					_eventHandlers[key].splice(targetIndex, 1);
 				}
-			})
+			});
 		},
 
 		unobserveAll: () => {
@@ -132,9 +131,7 @@ function ViewportTrigger(options = {}) {
 				_eventHandlers[key].length = 0;
 			});
 		}
-
 	};
-
 }
 
 export default ViewportTrigger;
