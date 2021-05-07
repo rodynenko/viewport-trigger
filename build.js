@@ -1,7 +1,7 @@
 const { rollup } = require('rollup');
 const filesize = require('rollup-plugin-filesize');
 const { getBabelOutputPlugin } = require('@rollup/plugin-babel');
-const { uglify } = require('rollup-plugin-uglify');
+const { terser } = require('rollup-plugin-terser');
 
 const defaultPlugins = [
 	getBabelOutputPlugin({ presets: ['@babel/preset-env'], allowAllFormats: true }),
@@ -25,7 +25,7 @@ function build(target, format, plugins) {
 
 function generateBundle() {
 	return Promise.all([
-		build('dist/viewport-trigger.min.js', 'iife', [uglify()]),
+		build('dist/viewport-trigger.min.js', 'iife', [terser()]),
 		build('dist/viewport-trigger.js', 'umd', [])
 	]);
 }
