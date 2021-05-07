@@ -1,49 +1,33 @@
 const { rollup } = require('rollup');
 const filesize = require('rollup-plugin-filesize');
-const babel = require('rollup-plugin-babel');
-const uglify = require('rollup-plugin-uglify');
-
-const targets = {
-	min: 'dist/viewport-trigger.min.js',
-	umd: 'dist/viewport-trigger.js'
-};
+const { getBabelOutputPlugin } = require('@rollup/plugin-babel');
+const { uglify } = require('rollup-plugin-uglify');
 
 const defaultPlugins = [
-	babel({
-		babelrc: false,
-		presets: [
-			[
-				'env',
-				{
-					modules: false
-				}
-			],
-			'stage-0'
-		],
-		plugins: [
-			'external-helpers'
-		]
-	}),
+	getBabelOutputPlugin({ presets: ['@babel/preset-env'], allowAllFormats: true }),
 	filesize()
 ];
 
-function build(type) {
-	const plugins = type === 'min' ? defaultPlugins.concat(uglify()) : defaultPlugins;
-
+function build(target, format, plugins) {
 	return rollup({
 		input: 'src/viewport-trigger.js',
-		plugins
-	}).then(bundle =>
-		bundle.write({
-			file: targets[type],
-			format: type === 'min' ? 'iife' : 'umd',
+		plugins: defaultPlugins.concat(plugins)
+	})
+		.then((bundle) => bundle.write({
+			file: target,
+			format,
 			name: 'ViewportTrigger'
-		}));
+		}))
+		.catch((err) => {
+			console.log(err);
+		});
 }
 
 function generateBundle() {
-	return Promise.all([build('umd'), build('min')])
-		.catch(err => console.log(err));
+	return Promise.all([
+		build('dist/viewport-trigger.min.js', 'iife', [uglify()]),
+		build('dist/viewport-trigger.js', 'umd', [])
+	]);
 }
 
 generateBundle();

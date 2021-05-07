@@ -4,7 +4,7 @@
   "description": "Perfomant, light library in pure JS to trigger callback when elements exit or leave viewport, using IntersectionObserver API",
   "homepage": "https://github.com/rodynenko/viewport-trigger",
   "engines": {
-    "node": ">=6.9"
+    "node": ">=10"
   },
   "scripts": {
     "build": "cross-env NODE_ENV=production node build.js",
@@ -33,21 +33,22 @@
   ],
   "license": "MIT",
   "devDependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/preset-env": "^7.14.1",
+    "@rollup/plugin-babel": "^5.3.0",
     "babel-core": "^6.26.0",
     "babel-plugin-external-helpers": "^6.22.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-0": "^6.24.1",
     "browser-sync": "^2.23.6",
-    "chokidar": "^2.0.2",
-    "cross-env": "^5.1.4",
-    "eslint": "^4.19.0",
-    "eslint-config-airbnb": "^16.1.0",
+    "chokidar": "^3.5.1",
+    "cross-env": "^7.0.3",
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb": "^18.2.1",
     "eslint-plugin-import": "^2.9.0",
     "npm-run-all": "^4.1.2",
-    "rollup": "^0.57.1",
-    "rollup-plugin-babel": "^3.0.3",
-    "rollup-plugin-filesize": "^1.5.0",
-    "rollup-plugin-license": "^0.6.0",
-    "rollup-plugin-uglify": "^3.0.0"
+    "rollup": "^2.47.0",
+    "rollup-plugin-filesize": "^9.1.1",
+    "rollup-plugin-uglify": "^6.0.4"
   }
 }
